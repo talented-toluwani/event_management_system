@@ -1,7 +1,7 @@
 import logging 
 import event_exceptions
 from event_enums import UserRole, EventCategory, EventStatus
-from datetime import datetime
+from event_config import DISPLAY_DATE_FORMAT
 
 class MenuHandler:
 
@@ -561,8 +561,8 @@ class MenuHandler:
             event = self.event_service.get_event(event_id)
             print("\nEvent Details:")
             print(f"Event: {event.title}")
-            formatted_date = event.date_time.strftime(config.DISPLAY_DATE_FORMAT)
-            print(f"Date: {event.formatted_date}")
+            formatted_date = event.date_time.strftime(DISPLAY_DATE_FORMAT)
+            print(f"Date: {formatted_date}")
             print(f"Capacity: {event.current_participants}/{event.max_capacity}")
         
         except event_exceptions.EventNotFound as e:
@@ -578,13 +578,70 @@ class MenuHandler:
                 return
             
             print(f"\n Registered participants {len(participant_ids)}")
-            for user_id in participant_ids:
-                self.user_service.get_user(user_id)
-                print("{index}. {user.name} ({user.email}) - Role: {user.role.value}")
+            for index, user_id in enumerate(participant_ids, start = 1):
+                user = self.user_service.get_user(user_id)
+                print(f"{index}. {user.name} ({user.email}) - Role: {user.role.value}")
 
         except Exception as e:
             self.logger.error(f"Error occurred: {e}")
             print("Failed to load participants.")
-            
 
+    
+    def _display_events_list(self, events):
+        print("=" * 80)
+
+        for event in events:
+            self._display_single_event(event)
+            print("-" * 80)
+        
+        print("=" * 80)
+    
+
+    def _display_single_event(self, event ):
+
+        formatted_date = event.date_time.strftime(DISPLAY_DATE_FORMAT)
+        available = event.available_spots
+        
+        if event.is_full:
+           status_text = "FULL"
+           print(status_text)
+        
+        elif event.status == EventStatus.CANCELLED:
+            status_text ="CANCELLED"
+            print(status_text)
+        
+        else:      
+            print(status_text = event.status.value)
+
+        print("\n Below are the complete event details: ")
+
+        print(f"Event ID: {event.event_id}")
+        print(f"Title: {event.title} ")
+        print(f"Description: {event.description}")
+        print(f"Category: {event.category.value}")
+        print(f"Date & Time: {formatted_date}")
+        print(f"Capacity: : {event.current_participants} / {event.max_capacity}")
+        print(f"Available_spots: {available}")
+        print(f"Status: {status_text} ")
+
+        if event.is_full:
+            print("🔴 This event is full")
+
+        elif available < 5:
+            print(f"⚠️ Only {available} spots remaining!")
+
+    def _get_menu_choice(self, min_choice, max_choice):
+
+        while True:
+            user_choice = self._get_integer_input(f"Enter your choice in this order ({min_choice}-{max_choice}):  ")
+
+            if (user_choice < min_choice) or (user_choice > max_choice):
+                print(f"Invalid choice. Please enter a number between {min_choice} and {max_choice}")
+                continue
+            return user_choice
             
+    
+
+     
+                
+
