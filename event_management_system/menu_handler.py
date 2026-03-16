@@ -1,13 +1,15 @@
 import logging 
-from event_enums import UserRole
 import event_exceptions
+from event_enums import UserRole, EventCategory, EventStatus
+from datetime import datetime
 
 class MenuHandler:
 
-    def __init__(self, event_service, user_service):
+    def __init__(self, event_service, user_service, registration_repository):
 
         self.event_service = event_service
         self.user_service = user_service
+        self.registration_repository = registration_repository
         self.current_user = None 
         self.logger = logging.getLogger(__name__)
     
@@ -225,6 +227,364 @@ class MenuHandler:
         print("\n === All events === ")
 
         try:
-            events = self.even
+            events = self.event_service.get_all_events()
+
+            if not events:
+                print("Sorry, no events available presently.")
+                return #exists the method if there are no availabe methods
             
-           
+            self._display_events_list(events)
+               
+        except Exception as e:
+            self.logger.error(f"Error occurred: {e}")
+            print("Failed to load events. Please try again.")
+
+    def _view_upcoming_events(self):
+        print("\n === Upcoming Events === ")
+
+        try:
+            events = self.event_service.get_upcoming_events()
+
+            if not events:
+                print("No upcoming events available.")
+                return
+            
+            self._display_events_list(events)
+
+        except Exception as e:
+            self.logger.error(f"Error occurred: {e}")
+            print("Failed to load upcoming events. Please try again.")
+
+    def _search_events(self):
+        print("\n === Search Events === ")
+
+        keyword = self._get_string_input("Enter search keyword: ")
+
+        try:
+            events = self.event_service.search_events(keyword)
+
+            if not events:
+                print(f"No event found matching {keyword}")
+                return
+            
+            else:
+                print(f"Found {len(events)} event(s) matching {keyword} ")
+                self._display_events_list(events)
+
+        except Exception as e:
+            self.logger.error(f"Error occurred: {e}")
+            print("Search failed. Please try again.")
+
+    def _view_my_events(self):
+        print("\n === My Registered Events === ")
+        
+        try:
+            events = self.user_service.get_user_events(self.current_user.user_id)
+            
+            if not events:
+                print("You are yet to register for any events.")
+                print("Tip: Use 'Join event' to register for events.")
+                return
+            
+            print(f"You are registered for {len(events)} event(s)")
+            self._display_events_list(events)
+
+        except event_exceptions.UserNotFound as e:
+            self.logger.error("User was not found")
+            print(f"Error ocurred: {e}")
+
+        except Exception as e:
+            self.logger.error(f"Error viewing user events: {e}")
+            print("Failed to load your events. Please try again.")
+
+
+    def _join_event(self):
+        print("\n === Join Event === ")      
+        print("Available Events: ")
+
+        try:
+            events = self.event_service.get_upcoming_events()
+
+            if not events:
+                print("No upcoming events available to join.")
+                return
+            
+            self._display_events_list(events)
+
+            event_id = self._get_integer_input("Enter event ID to join.")
+
+            self.event_service.register_user(self.current_user.user_id, event_id)
+            print("Successfully registered for the event!")
+            print("You can view your registered events from the main menu.")
+        
+        except event_exceptions.EventFullError as e:
+            self.logger.error(f"Error occurred: {e}")
+            print("This event is at full capacity. Please choose another event.")
+
+        except event_exceptions.DuplicateRegistration as e:
+            self.logger.error(f"Error occurred: {e}")
+            print("You are already registered for this event.")
+
+        except event_exceptions.EventNotFound as e:
+            self.logger.error(f"Error occurred: {e}")
+            print("No event with the event id found.")
+
+        except Exception as e:
+            self.logger.error(f"Error occurred: {e}")
+            print("Failed to join event. Please try again.")
+
+#REMEMBER to implement the get_confiramtion helper method alongside other helper methods.
+    def _cancel_registration(self):
+        print("\n === Cancel Registration === ") 
+        print("Your registered events: ")
+
+        try:
+            events = self.user_service.get_user_events(self.current_user.user_id)
+
+            if not events:
+                print("You have not registered for any events.")
+                return
+            
+            self._display_events_list(events)
+
+            event_id = self._get_integer_input("Enter event ID to cancel.")
+            confirmed = self._get_confirmation("Are you sure you want to cancel this regsitration? (yes/no)")
+
+            if not confirmed:
+                print("Cancellation aborted.")
+                return
+        
+            self.event_service.unregister_user(self.current_user.user_id, event_id)
+            print("Registration cancelled successfully.")
+
+        except event_exceptions.EventNotFound as e:
+            self.logger.error(f"Error occurred: {e}")
+            print("Event was not found.")
+
+        except Exception as e:
+            self.logger.error(f"Error cancelling event: {e}")
+            print("Failed to cancel registration. Please try again.")
+
+    
+    def _create_event(self):
+        print("\n === Create New Event === ")
+
+        title = self._get_string_input("Enter event title: ")
+        description = self._get_string_input("Enter event description: ")
+        date_time = self._get_datetime_input("Enter event date and time (YYYY-MM-DD HH:MM): ")
+        max_capacity = self._get_integer_input("Enter maximum capacity: ")
+
+        if max_capacity <= 0:
+            print("Capacity must be greater than 0")
+            return
+        
+        print("\n Select Event Category: ")
+        print(f"1. {EventCategory.WORKSHOP.value}")
+        print(f"2. {EventCategory.SEMINAR.value}")
+        print(f"3. {EventCategory.SPORTS.value}")
+        print(f"4. {EventCategory.OTHER.value}")
+
+        user_choice = self._get_menu_choice(1, 4)
+        
+        category_map = {
+            1: EventCategory.WORKSHOP,
+            2: EventCategory.SEMINAR,
+            3: EventCategory.SPORTS,
+            4: EventCategory.OTHER
+        }
+        
+        category = category_map[user_choice]
+       
+        try:
+            new_event = self.event_service.create_event(title, description, date_time, max_capacity, category)
+            print(f"Success! Event {new_event.title} created successfully!")
+            print(f"Event ID {new_event.event_id}")
+
+        except event_exceptions.InvalidDate as e:
+            self.logger.error(f"Error occurred: {e}")
+            print("Event must be scheduled for future dates.")
+
+        except ValueError as e:
+            self.logger.error(f"Error occurred: {e}")
+            print("Invalid input. Please ensure valid data was supplied for each required field.")
+
+        except Exception as e:
+            self.logger.error(f"Error occurred: {e}")
+            print("Failed to create event. Please try again.")
+        
+  
+    def _edit_event(self):
+
+        print("\n === Edit Event === ")
+
+        self._view_all_events()
+        event_id = self._get_integer_input("Enter event ID to edit: ")
+
+        try:
+            event = self.event_service.get_event(event_id)
+
+        except event_exceptions.EventNotFound as e:
+            self.logger.error(f"Error occurred: {e}")
+            print("No event found.")
+            return
+        
+        print("\n Current event details")
+        self._display_single_event(event)
+
+        print("\n What will you like to edit?")
+
+        print("1. Title")
+        print("2. Description")
+        print("3. Date and Time ")
+        print("4. Maximum Capacity")
+        print("5. Category")
+        print("6. Cancel")
+
+        user_choice = self._get_menu_choice(1, 6)
+
+        if user_choice == 1:
+
+            new_title = self._get_string_input("Enter new title: ")
+            event.title = new_title
+
+        elif user_choice == 2:
+
+            new_description = self._get_string_input("Enter new description: ")
+            event.description = new_description
+
+        elif user_choice == 3:
+            
+            new_date_time = self._get_datetime_input("Enter new date and time (YYYY-MM-DD HH:MM): ")
+            event.date_time = new_date_time
+
+        elif user_choice == 4:
+
+            new_capacity = self._get_integer_input("Enter new maximum capacity: ")
+
+            if new_capacity > 0:
+                event.max_capacity = new_capacity
+            else:
+                print("New capacity must be greater than 0")
+                return
+
+        elif user_choice == 5:
+
+            print("\n Select Event Category: ")
+            print(f"1. {EventCategory.WORKSHOP.value}")
+            print(f"2. {EventCategory.SEMINAR.value}")
+            print(f"3. {EventCategory.SPORTS.value}")
+            print(f"4. {EventCategory.OTHER.value}")
+
+            category_choice = self._get_menu_choice(1, 4)
+
+            category_map = {
+            1: EventCategory.WORKSHOP,
+            2: EventCategory.SEMINAR,
+            3: EventCategory.SPORTS,
+            4: EventCategory.OTHER
+        }    
+            event.category = category_map[category_choice]
+        
+        else:
+            return
+        
+        try:
+            self.event_service.update_event(event)
+            print("Event updated successfully")
+
+        except event_exceptions.InvalidDate as e:
+            self.logger.error(f"Error occurred: {e}")
+            print("Invalid date.")
+
+        except Exception as e:
+            self.logger.error(f"Error occurred: {e}")
+            print("Failed to edit event. Please try again!")
+
+    def _cancel_event_admin(self):
+
+        print("\n === Cancel Event === ")
+        self._view_all_events()
+
+        event_id = self._get_integer_input("Enter event ID to cancel: ")
+        confirmed = self._get_confirmation("Are you sure you want to cancel this event? This will notify alll registered users(yes/no)")
+
+        if not confirmed:
+            print("Action aborted")
+            return
+
+        try:
+            self.event_service.cancel_event(event_id)
+            print("Event cancelled successfully!")
+            print(f"Status changed to {EventStatus.CANCELLED.value}")
+
+        except event_exceptions.EventNotFound as e:
+            self.logger.error(f"Error occurred: {e}")
+            print("Event not found")
+
+        except Exception as e:
+            self.logger.error(f"Error occurred: {e}")
+            print("Failed to cancel event.")
+
+    def _delete_event(self):
+
+        print("\n === Delete Event ===")
+        self._view_all_events()
+        event_id = self._get_integer_input("Enter event ID to delete: ")
+
+        print("WARNING: This will permanently delete the event and all registrations.")
+        print("This action CANNOT be undone.")
+        confirmed = self._get_string_input(" Type 'DELETE' to confirm: ").upper()
+
+        if confirmed != "DELETE":
+            print("Deletion Cancelled.")
+            return
+        
+        try:
+            self.event_service.delete_event(event_id)
+            print("Event deleted permanently.")
+
+        except event_exceptions.EventNotFound as e:
+            self.logger.error(f"Error occurred: {e}")
+            print("Failed to delete event.")
+
+        except Exception as e:
+            self.logger.error(f"Error occurred: {e}")
+            print("Failed to delete event.")
+
+    def _view_event_participants(self):
+
+        print("\n === View Event Participants ===")
+        self._view_all_events()
+        event_id = self._get_integer_input("Enter event ID to view participants.")
+
+        try:
+            event = self.event_service.get_event(event_id)
+            print("\nEvent Details:")
+            print(f"Event: {event.title}")
+            formatted_date = event.date_time.strftime(config.DISPLAY_DATE_FORMAT)
+            print(f"Date: {event.formatted_date}")
+            print(f"Capacity: {event.current_participants}/{event.max_capacity}")
+        
+        except event_exceptions.EventNotFound as e:
+            self.logger.error(f"Error occurred: {e}")
+            print("Event not found.")
+            return
+
+        try:
+            participant_ids = self.registration_repository.get_event_participants(event_id)
+
+            if not participant_ids:
+                print("No participants for this event.")
+                return
+            
+            print(f"\n Registered participants {len(participant_ids)}")
+            for user_id in participant_ids:
+                self.user_service.get_user(user_id)
+                print("{index}. {user.name} ({user.email}) - Role: {user.role.value}")
+
+        except Exception as e:
+            self.logger.error(f"Error occurred: {e}")
+            print("Failed to load participants.")
+            
+
+            
