@@ -1,10 +1,9 @@
 from event_models import Event
 import logging
 from datetime import datetime 
-from event_enums import EventCategory
-from event_enums import EventStatus
+from event_enums import EventCategory, EventStatus
 from event_exceptions import EventNotFound
-from typing import List
+
 
 class EventRepository:
       def __init__(self, connection) : #initializes with the connection object
@@ -56,7 +55,7 @@ class EventRepository:
                row = cursor.fetchone()#returns a match if it finds similar event, if not none, and helps it to hold actual data.
             
                if row is not None:
-                #validates if there are any data stores in my_row
+                #validates if there are any data stored in my_row
                 return self._row_to_event(row) #a function call for the helper function
                
                raise EventNotFound(event_id)
@@ -103,6 +102,7 @@ class EventRepository:
 
                 rows = cursor.fetchall() #fetches all the rows in the table
                 events_lists = []#makes an empty list to add the event object to 
+                
                 for row in rows: #loops through each rows 
                     event_object = self._row_to_event(row)#calls the helper function which converts the rows to event objects
                     events_lists.append(event_object) #adds the event to the list
