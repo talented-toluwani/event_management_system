@@ -1,7 +1,8 @@
 import logging 
 import event_exceptions
 from event_enums import UserRole, EventCategory, EventStatus
-from event_config import DISPLAY_DATE_FORMAT
+from event_config import DISPLAY_DATE_FORMAT, DATE_FORMAT
+from datetime import datetime
 
 class MenuHandler:
 
@@ -641,6 +642,60 @@ class MenuHandler:
             return user_choice
             
     
+    def _get_integer_input(self, prompt):
+        while True:
+            try:
+                user_input = input(prompt).strip()
+                converted_input = int(user_input)
+                return converted_input
+            
+            except ValueError:
+                print("Invalid input. Please enter a valid number.")
+                
+    def _get_string_input(self, prompt):
+        while True:
+           
+            user_input = input(prompt).strip()
+           
+
+            if not user_input:
+                print("Input cannot be empty. Please try again.")
+                continue
+
+            return user_input
+        
+    def _get_datetime_input(self, prompt):
+        while True:
+            try:
+                user_input = input(prompt).strip()
+                datetime_object = datetime.strptime(user_input, DATE_FORMAT)
+                return datetime_object
+
+            except ValueError:
+                print( "Invalid date format. Please use YYYY-MM-DD HH:MM")
+                print("Example: 2025-12-25 18:30")
+                continue
+    
+    def _get_confirmation(self, prompt):
+        while True:
+            user_response = input(prompt).strip().lower()
+
+            if user_response not in ["yes", "no"]:
+                print("Invalid input. Please enter yes or no.")
+                continue
+
+            elif user_response == "yes":
+                return True
+            
+            else:
+                return False
+
+
+               
+
+
+            
+
 
      
                 
