@@ -1,11 +1,12 @@
 import sqlite3
-
-DB_NAME = 'event_management.db'#creates a database file for the event management system
+from event_config import DATABASE_PATH
 
 def get_connection(): #provides a connection between the database and the sqlite 3 module
-    return sqlite3.connect(DB_NAME)
+    connection = sqlite3.connect(DATABASE_PATH)
+    connection.row_factory = sqlite3.Row
+    return connection
 
-def create_tables():
+def init_database():
     connection = get_connection() #creates a connection object with the previously connection established
     my_cursor = connection.cursor()#creates a cursor object
 
