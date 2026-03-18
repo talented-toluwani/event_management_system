@@ -334,7 +334,6 @@ class MenuHandler:
             self.logger.error(f"Error occurred: {e}")
             print("Failed to join event. Please try again.")
 
-#REMEMBER to implement the get_confiramtion helper method alongside other helper methods.
     def _cancel_registration(self):
         print("\n === Cancel Registration === ") 
         print("Your registered events: ")
@@ -689,14 +688,3 @@ class MenuHandler:
             
             else:
                 return False
-
-
-               
-
-
-            
-
-
-     
-                
-
