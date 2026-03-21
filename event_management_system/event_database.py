@@ -33,14 +33,10 @@ def init_database():
                       user_id  INTEGER NOT NULL,
                       event_id INTEGER  NOT NULL,
                       registered_at  TEXT NOT NULL,
-                      UNIQUE(user_id, event_id)#it is a constraint that does not allow two rows with the same user id, and event id comination
+                      UNIQUE(user_id, event_id)
                       )""") #creates the registration table 
     
 
     connection.commit() #saves all changes made
     connection.close()  #closes the connection
     
-
-
-
-
