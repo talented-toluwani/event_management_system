@@ -1,7 +1,6 @@
 import event_exceptions as event_exceptions
 import logging
 from datetime import datetime
-from typing import List,tuple
 from event_models import User, Event
 
 
@@ -130,7 +129,7 @@ class RegistrationRepository:
                 cursor.close()
 
 
-    def get_user_events(self, user_id:int) -> List[Event]: 
+    def get_user_events(self, user_id:int): 
         cursor = None
 
         if  user_id is None:
@@ -140,7 +139,7 @@ class RegistrationRepository:
             cursor = self.connection.cursor()
             query = "SELECT event_id FROM registrations_table WHERE user_id = ?"
             cursor.execute(query, (user_id,))
-            rows: List[tuple] = cursor.fetchall()
+            rows = cursor.fetchall()
 
             if not rows:
                 return []
@@ -156,7 +155,7 @@ class RegistrationRepository:
                 cursor.close()  
 
 
-    def get_events_participants(self, event_id: int) -> List[User]:
+    def get_events_participants(self, event_id: int):
         cursor = None
         
         if event_id is None:
@@ -166,7 +165,7 @@ class RegistrationRepository:
             cursor = self.connection.cursor()
             query = "SELECT user_id FROM registrations_table WHERE event_id = ?"
             cursor.execute(query, (event_id,))
-            rows: List[tuple]= cursor.fetchall()
+            rows= cursor.fetchall()
 
             if not rows:
                 return []
