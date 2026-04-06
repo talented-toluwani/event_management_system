@@ -54,15 +54,16 @@ class EventRepository:
                cursor.execute(query, (event_id,)) # the event is made a tuple, and it is passed into the query
                row = cursor.fetchone()#returns a match if it finds similar event, if not none, and helps it to hold actual data.
             
-               if row is not None:
-                #validates if there are any data stored in my_row
+               if row is not None: #validates if there are any data stored in my_row
                 return self._row_to_event(row) #a function call for the helper function
                
-               raise EventNotFound(event_id)
+           except EventNotFound(event_id):
+               logging.error("The evnent to be fetched was not gotten", exc_info = True)
+               raise 
 
            except Exception:
                 logging.error("An error occurred in get_by_id", exc_info=True)
-                return []
+                raise #raises database error,so user know domething went well.
 
            finally:
                 if  cursor is not None:
@@ -122,8 +123,9 @@ class EventRepository:
                 cursor = self.connection.cursor()#establieshes a cursor object
                 query = "SELECT * FROM events_table WHERE date_time > DATETIME('now') AND  status = 'upcoming'"
                 cursor.execute(query)
-                rows = cursor.fetchall()#fetches all the rows that matches the query
-                event_upcoming_list = []#an empty list to store the upcoming events objects
+                rows = cursor.fetchall() #fetches all the rows that matches the query
+                event_upcoming_list = [] #an empty list to store the upcoming events objects
+
                 for row in rows:#loops over individual items 
                     event_upcoming_object = self._row_to_event(row)
                     event_upcoming_list.append(event_upcoming_object)
@@ -225,6 +227,7 @@ class EventRepository:
           
           except Exception:
               logging.error("An error occurred in update", exc_info = True)
+              raise
 
           finally:
               if cursor is not None:
@@ -247,14 +250,13 @@ class EventRepository:
                   return None
                
               query = ("DELETE FROM events_table WHERE event_id = ?")
-             
-              
               cursor.execute(query, (event_id,))
               self.connection.commit()
               return True 
           
           except Exception:
               logging.error("An error occurred in delete", exc_info = True)
+              raise
 
           finally:
               if cursor is not None:
@@ -274,7 +276,7 @@ class EventRepository:
               return count
 
           except Exception:
-              logging.error("An error ocurred in get_participant_count", exc_info= True)
+              logging.error("An error occurred in get_participant_count", exc_info= True)
               raise
               
           finally:
