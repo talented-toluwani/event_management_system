@@ -29,7 +29,7 @@ class UserService:
         existing_user = self.user_repository.get_by_email(email)
 
         if existing_user is not None:
-            raise event_exceptions.DuplicateRegistration()
+            raise ValueError(f"A user with the email {email} already exists.")
 
         print("Creating User")
         new_user = None

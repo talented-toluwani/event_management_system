@@ -105,7 +105,7 @@ class MenuHandler:
         
     
     def handle_admin_menu(self):
-        print(f"\n === Welcome {self._current_user.name} to the Admin Menu of the Vantag Event Management System")
+        print(f"\n === Welcome {self.current_user.name} to the Admin Menu of the Vantag Event Management System")
         print("You can perform the following actions.\n")
 
         print("1. Create event")
@@ -179,28 +179,28 @@ class MenuHandler:
         try:
             new_user = self.user_service.register_user(user_name, user_email, user_role)
 
-            if self.current_user is None:
+            if new_user is None:
                 print("Failed to create user...")
 
             else:
                 print(f"Registration successful! Welcome {new_user.name}.")
                 self.current_user = new_user
 
-
         except event_exceptions.InvalidEmail as e:
             print(f"Error message: {e}")
             self.logger.error("The user entered in an invalid email format", exc_info=True)
-                
+          
         except event_exceptions.DuplicateRegistration as e:
             print(f"Error message: {e}")
-            self.logger.error("The user has regsitered before.", exc_info=True)
+            self.logger.error("The user has registered before.", exc_info=True)
+            
                 
         except ValueError as e:
             print(f"Invalid input: {e}")
-            self.logger.error("The users entered in a wrong input", exc_info=True)
+            self.logger.error("The users entered in a wrong input")
             
         except Exception as e:
-            print("An unecpected error occurred. Please try again.")
+            print("An unexpected error occurred. Please try again.")
             self.logger.error(f"Unexpected error occurred {e}")
 
 
@@ -617,7 +617,8 @@ class MenuHandler:
             print(status_text)
         
         else:      
-            print(status_text = event.status.value)
+            status_text = event.status.value
+            print(status_text)
 
         print("\n Below are the complete event details: ")
 
