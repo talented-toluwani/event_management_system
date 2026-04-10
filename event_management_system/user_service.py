@@ -16,10 +16,7 @@ class UserService:
         
         if len(name) < 2 or len(name) > 50:
             raise ValueError("The length of the name must be between 2 and 50 characters.")
-        
-        if role is not UserRole.PARTICIPANT:
-            raise PermissionError("Note, you must have the role of a participant, before you can register")
-        
+      
         email_regex = r"^[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}$"
     
         if not re.fullmatch(email_regex, email.strip().lower()):

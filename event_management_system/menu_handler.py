@@ -99,7 +99,7 @@ class MenuHandler:
             self._view_my_events()
             return True
         
-        else:
+        elif user_choice == 7:
             self._logout()
             return True
         
@@ -235,15 +235,15 @@ class MenuHandler:
 
         try:
             events = self.event_service.get_all_events()
-
+              
             if not events:
                 print("Sorry, no events available presently.")
-                return #exists the method if there are no availabe methods
+                return #exists the method if there are no availabe events
             
             self._display_events_list(events)
                
         except Exception as e:
-            self.logger.error(f"Error occurred: {e}")
+            self.logger.error(f"Error occurred: {e}", exc_info = True)
             print("Failed to load events. Please try again.")
 
     def _view_upcoming_events(self):
