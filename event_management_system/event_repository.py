@@ -44,6 +44,8 @@ class EventRepository:
            finally:
                  if cursor is not None:
                     cursor.close()
+            
+           return event
 
       def get_by_id(self, event_id: int):
            cursor = None
