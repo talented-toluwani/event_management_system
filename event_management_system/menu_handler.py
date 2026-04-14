@@ -512,7 +512,7 @@ class MenuHandler:
         self._view_all_events()
 
         event_id = self._get_integer_input("Enter event ID to cancel: ")
-        confirmed = self._get_confirmation("Are you sure you want to cancel this event? This will notify alll registered users(yes/no)")
+        confirmed = self._get_confirmation("Are you sure you want to cancel this event? This will notify alll registered users(yes/no): ")
 
         if not confirmed:
             print("Action aborted")

@@ -100,7 +100,9 @@ class EventService:
         
         filtered_events = self.event_repository.get_by_category(category)
         return filtered_events or []
-
+    
+    def update_event(self, event):
+        return self.event_repository.update(event)
 
     def register_user(self, user_id:int, event_id:int):
         """ Registers a user for an event.
@@ -189,7 +191,7 @@ class EventService:
         if event is None:
             raise event_exceptions.EventNotFound(event_id)
         
-        self.event_repository.delete(event)
+        self.event_repository.delete(event_id)
         return True
         
     
