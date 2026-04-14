@@ -68,6 +68,9 @@ class EventService:
     def get_upcoming_events(self) -> List[Event]:
         upcoming_events = self.event_repository.get_upcoming()
         return upcoming_events
+   
+    def get_events_by_user(self, user_id):
+        return self.event_repository.get_events_by_user(user_id)
     
 
     def search_events(self, keyword:str ) -> List[Event]:

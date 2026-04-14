@@ -119,12 +119,42 @@ class EventRepository:
                  if  cursor is not None:
                     cursor.close()
 
+      def get_events_by_user(self, user_id):
+          cursor = None
+
+          try:
+              query = """SELECT e.* FROM events_table e
+                        INNER JOIN registrations_table r ON e.event_id = r.event_id
+                        WHERE r.user_id = ?
+                        ORDER BY e.date_time   
+              """
+              cursor = self.connection.cursor()
+              cursor.execute(query, (user_id,))
+
+              rows = cursor.fetchall()
+              event_list = []
+
+              for row in rows:
+                  event_object = self._row_to_event(row)
+                  event_list.append(event_object)
+              return event_list
+            
+          except Exception:
+              logging.error("Error in get_events_by_user", exc_info=True)
+              raise
+          
+          finally:
+              if cursor is not None:
+                  cursor.close()
+                  
+
       def get_upcoming(self):#fetches all the events, filtered by date and status
            cursor = None
            try:
                 cursor = self.connection.cursor()#establieshes a cursor object
-                query = "SELECT * FROM events_table WHERE date_time > DATETIME('now') AND  status = 'upcoming'"
+                query = "SELECT * FROM events_table WHERE status = 'upcoming'"
                 cursor.execute(query)
+
                 rows = cursor.fetchall() #fetches all the rows that matches the query
                 event_upcoming_list = [] #an empty list to store the upcoming events objects
 

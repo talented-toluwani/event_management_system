@@ -286,7 +286,7 @@ class MenuHandler:
         print("\n === My Registered Events === ")
         
         try:
-            events = self.user_service.get_user_events(self.current_user.user_id)
+            events = self.event_service.get_events_by_user(self.current_user.user_id)
             
             if not events:
                 print("You are yet to register for any events.")
@@ -345,7 +345,7 @@ class MenuHandler:
         print("Your registered events: ")
 
         try:
-            events = self.user_service.get_user_events(self.current_user.user_id)
+            events = self.event_service.get_events_by_user(self.current_user.user_id)
 
             if not events:
                 print("You have not registered for any events.")
@@ -354,7 +354,7 @@ class MenuHandler:
             self._display_events_list(events)
 
             event_id = self._get_integer_input("Enter event ID to cancel.")
-            confirmed = self._get_confirmation("Are you sure you want to cancel this regsitration? (yes/no)")
+            confirmed = self._get_confirmation("Are you sure you want to cancel this regsitration? (yes/no: ")
 
             if not confirmed:
                 print("Cancellation aborted.")
