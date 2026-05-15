@@ -17,7 +17,7 @@ Features
 - Interactive Menu — Clean CLI navigation via a dedicated `MenuHandler` class
 
 Project Structure
-
+```
 vantag-event-management/
 │
 ├── main.py                  # Application entry point
@@ -37,7 +37,7 @@ vantag-event-management/
 │
 └── README.md
 
-
+```
 Architecture
 
 This project follows a layered architecture pattern:
