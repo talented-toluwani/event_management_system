@@ -1,4 +1,5 @@
 Vantag Event Management System
+
 A command-line event management application built with Python and SQLite, demonstrating clean architecture principles including separation of concerns, 
 repository/service layering, and modular design.
 
