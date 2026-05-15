@@ -4,6 +4,7 @@ A command-line event management application built with Python and SQLite, demons
 repository/service layering, and modular design.
 
 Overview
+
 Vantag is a fully functional CLI-based event management system that allows users to create, view, update, and delete events through an interactive menu interface. 
 It was built as a structured learning project to apply real-world software design patterns in Python.
 
@@ -40,6 +41,7 @@ vantag-event-management/
 ```
 Architecture
 
+```
 This project follows a layered architecture pattern:
 
 User Input (CLI)
@@ -52,7 +54,7 @@ EventRepository    ← database queries (SQLite)
       ↓
 SQLite Database
 
-
+```
 This separation ensures each component has a single responsibility, making the codebase easier to maintain, test, and extend.
 
  Tech Stack
